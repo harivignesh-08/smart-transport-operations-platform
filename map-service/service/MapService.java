@@ -7,7 +7,11 @@ import java.util.List;
 public interface MapService {
 
     VehicleLocation saveLocation(VehicleLocation vehicleLocation);
+
     VehicleLocation getVehicleLocation(Long vehicleId);
+
     List<VehicleLocation> getAllLocations();
+
+    VehicleLocation updateLocation(VehicleLocation vehicleLocation);
 
 }
