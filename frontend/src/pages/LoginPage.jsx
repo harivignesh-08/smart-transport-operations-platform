@@ -141,7 +141,7 @@ export default function LoginPage({ setLoggedIn }) {
                   type="text" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin / dispatcher" 
+                  placeholder="Enter username" 
                   required 
                   style={{ paddingLeft: '40px' }}
                 />
@@ -228,7 +228,7 @@ export default function LoginPage({ setLoggedIn }) {
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com" 
+                  placeholder="Enter email address" 
                   required 
                   style={{ paddingLeft: '40px' }}
                 />
@@ -243,7 +243,7 @@ export default function LoginPage({ setLoggedIn }) {
                   type="tel" 
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1-555-0000" 
+                  placeholder="Enter phone number" 
                   style={{ paddingLeft: '40px' }}
                 />
                 <Phone size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -274,7 +274,7 @@ export default function LoginPage({ setLoggedIn }) {
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" 
+                  placeholder="Enter password" 
                   required 
                   style={{ paddingLeft: '40px' }}
                 />
@@ -289,7 +289,22 @@ export default function LoginPage({ setLoggedIn }) {
                   type="password" 
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••" 
+                  placeholder="Confirm password" 
+                  required 
+                  style={{ paddingLeft: '40px' }}
+                />
+                <Key size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              </div>
+            </div>
+
+            <div className="input-group" style={{ marginBottom: '28px' }}>
+              <span className="input-label">Confirm Password</span>
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password" 
                   required 
                   style={{ paddingLeft: '40px' }}
                 />

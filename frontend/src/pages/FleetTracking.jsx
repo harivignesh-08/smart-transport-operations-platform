@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Compass, Navigation, Radio, MapPin, CheckCircle } from 'lucide-react';
+import { Compass, Navigation, Radio, MapPin, CheckCircle, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 
 export default function FleetTracking() {
@@ -7,13 +7,26 @@ export default function FleetTracking() {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [telemetry, setTelemetry] = useState({});
   const [wsStatus, setWsStatus] = useState('CONNECTING');
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationError, setLocationError] = useState('');
 
-  // SVG Map Path definitions representing routes
-  const routePaths = {
-    1: 'M 100 250 L 300 250 L 500 150 L 700 250 L 900 250',
-    2: 'M 150 100 L 350 100 L 450 300 L 650 300 L 850 150',
-    4: 'M 100 350 L 300 350 L 500 250 L 700 350 L 900 100'
-  };
+  useEffect(() => {
+    // Request user's geolocation
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+          setLocationError('');
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setLocationError('Unable to access device location. Enable location permissions.');
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     async function loadVehicles() {
@@ -29,54 +42,75 @@ export default function FleetTracking() {
     }
     loadVehicles();
 
-    // Simulate WebSocket connection to API Gateway websocket endpoint: /ws/tracking
-    const wsTimer = setTimeout(() => {
-      setWsStatus('CONNECTED');
-    }, 1500);
+    // Connect to WebSocket for real-time tracking
+    const connectWebSocket = () => {
+      try {
+        const ws = api.tracking.connectWebSocket();
+        ws.onopen = () => {
+          setWsStatus('CONNECTED');
+        };
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          setTelemetry(prev => ({ ...prev, ...data }));
+        };
+        ws.onerror = () => {
+          setWsStatus('ERROR');
+        };
+        ws.onclose = () => {
+          setWsStatus('DISCONNECTED');
+          // Attempt to reconnect after 3 seconds
+          setTimeout(connectWebSocket, 3000);
+        };
+      } catch (err) {
+        console.error('WebSocket connection error:', err);
+        setWsStatus('ERROR');
+      }
+    };
 
-    return () => clearTimeout(wsTimer);
+    connectWebSocket();
+
+    return () => {
+      setWsStatus('DISCONNECTED');
+    };
   }, []);
 
-  // Telemetry loop: periodically animate vehicle positions along SVG paths
+  // Fetch live tracking data from API
   useEffect(() => {
-    if (vehicles.length === 0) return;
-
-    const interval = setInterval(() => {
-      const updatedTelemetry = {};
-      const time = Date.now() / 8000; // Speed control
-
-      vehicles.forEach(vehicle => {
-        const id = vehicle.id;
-        const path = routePaths[id] || routePaths[1];
-        
-        // Approximate animation coordinates using trigonometric paths corresponding to paths
-        let progress = (time + (id * 0.2)) % 1.0;
-        let x = 100 + progress * 800;
-        let y = 250 + Math.sin(progress * Math.PI * 2) * 80;
-
-        // Map specific routes coordinates
-        if (id === 1) {
-          y = 250 + (progress > 0.25 && progress < 0.75 ? (progress - 0.25) * -100 : 0);
-        } else if (id === 2) {
-          y = 100 + (progress > 0.25 ? 100 : 0) + (progress > 0.5 ? 50 : 0);
-        } else if (id === 4) {
-          y = 350 - progress * 200;
+    const fetchLiveTracking = async () => {
+      try {
+        const liveData = await api.tracking.getLiveTracking();
+        if (liveData && liveData.length > 0) {
+          const telemetryMap = {};
+          liveData.forEach(vehicle => {
+            telemetryMap[vehicle.id] = {
+              lat: vehicle.latitude || userLocation?.lat || 40.7128,
+              lng: vehicle.longitude || userLocation?.lng || -74.0060,
+              speed: vehicle.speed || 0,
+              bearing: vehicle.bearing || 0,
+              lastUpdate: new Date().toLocaleTimeString()
+            };
+          });
+          setTelemetry(telemetryMap);
         }
+      } catch (err) {
+        console.error('Error fetching live tracking:', err);
+      }
+    };
 
-        updatedTelemetry[id] = {
-          x: Math.min(Math.max(x, 50), 950),
-          y: Math.min(Math.max(y, 50), 450),
-          speed: Math.floor(Math.sin(time + id) * 15 + 50), // Live fluctuating speed
-          bearing: Math.floor((Math.sin(time * 2) * 45) + 90),
-          lastUpdate: new Date().toLocaleTimeString()
-        };
-      });
-
-      setTelemetry(updatedTelemetry);
-    }, 200);
+    const interval = setInterval(fetchLiveTracking, 3000);
+    fetchLiveTracking(); // Initial fetch
 
     return () => clearInterval(interval);
-  }, [vehicles]);
+  }, [userLocation]);
+
+  // Convert coordinates to map pixels (simple mercator-like projection)
+  const lngToPixel = (lng) => {
+    return ((lng + 180) / 360) * 1000;
+  };
+
+  const latToPixel = (lat) => {
+    return ((90 - lat) / 180) * 500;
+  };
 
   return (
     <div className="page-container">
@@ -89,17 +123,34 @@ export default function FleetTracking() {
               <Radio size={16} className={wsStatus === 'CONNECTED' ? 'trend-up' : 'trend-down'} style={{ animation: 'pulse 1.5s infinite' }} />
               <span style={{ fontSize: '14px', fontWeight: '600' }}>
                 Gateway STOMP Socket status:{' '}
-                <span style={{ color: wsStatus === 'CONNECTED' ? 'var(--accent-emerald)' : 'var(--accent-amber)' }}>
+                <span style={{ color: wsStatus === 'CONNECTED' ? 'var(--accent-emerald)' : wsStatus === 'ERROR' ? 'var(--accent-rose)' : 'var(--accent-amber)' }}>
                   {wsStatus}
                 </span>
               </span>
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              Routing live via: <code style={{ background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '4px' }}>/ws/tracking</code>
+              {userLocation ? `Location: ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'Requesting location...'}
             </div>
           </div>
 
-          {/* Interactive SVG Map */}
+          {locationError && (
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '10px', 
+              padding: '12px', 
+              borderRadius: '8px', 
+              background: 'rgba(239, 68, 68, 0.1)', 
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              color: 'var(--accent-rose)',
+              fontSize: '12px'
+            }}>
+              <AlertCircle size={14} />
+              <span>{locationError}</span>
+            </div>
+          )}
+
+          {/* Live Map Display */}
           <div className="glass-panel map-container">
             <svg className="map-svg" viewBox="0 0 1000 500">
               {/* Grid Background Lines */}
@@ -110,28 +161,44 @@ export default function FleetTracking() {
               </defs>
               <rect width="1000" height="500" fill="url(#grid)" />
 
-              {/* Roads / Routes */}
-              <path d={routePaths[1]} className="map-road" />
-              <path d={routePaths[2]} className="map-road" />
-              <path d={routePaths[4]} className="map-road" />
-
-              {/* Active Route Highlight for Selected Vehicle */}
-              {selectedVehicle && (
-                <path 
-                  d={routePaths[selectedVehicle.id] || routePaths[1]} 
-                  className="map-road-active"
-                />
+              {/* User Location Marker */}
+              {userLocation && (
+                <g transform={`translate(${lngToPixel(userLocation.lng)}, ${latToPixel(userLocation.lat)})`}>
+                  <circle 
+                    r="12" 
+                    fill="rgba(56, 189, 248, 0.15)" 
+                    stroke="var(--accent-cyan)"
+                    strokeWidth="2"
+                  />
+                  <circle 
+                    r="4" 
+                    fill="var(--accent-cyan)"
+                  />
+                  <text 
+                    y="-18" 
+                    textAnchor="middle" 
+                    fill="var(--accent-cyan)" 
+                    fontSize="9" 
+                    fontWeight="700"
+                  >
+                    YOUR LOCATION
+                  </text>
+                </g>
               )}
 
               {/* Vehicle Markers */}
               {vehicles.map(vehicle => {
-                const pos = telemetry[vehicle.id] || { x: 150, y: 150 };
+                const pos = telemetry[vehicle.id];
+                if (!pos) return null;
+                
+                const x = lngToPixel(pos.lng || -74.0060);
+                const y = latToPixel(pos.lat || 40.7128);
                 const isSelected = selectedVehicle && selectedVehicle.id === vehicle.id;
                 
                 return (
                   <g 
                     key={vehicle.id} 
-                    transform={`translate(${pos.x}, ${pos.y})`}
+                    transform={`translate(${x}, ${y})`}
                     className="map-marker"
                     onClick={() => setSelectedVehicle(vehicle)}
                     style={{ cursor: 'pointer' }}
@@ -160,7 +227,7 @@ export default function FleetTracking() {
                       fill="var(--text-secondary)" 
                       fontSize="10" 
                       fontWeight="600"
-                      style={{ pointerEvents: 'none', background: 'black' }}
+                      style={{ pointerEvents: 'none' }}
                     >
                       {vehicle.name}
                     </text>
@@ -196,8 +263,8 @@ export default function FleetTracking() {
                 <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>GPS COORDINATES</div>
                   <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontFamily: 'monospace' }}>
-                    Lat: {(40.7128 + (telemetry[selectedVehicle.id]?.x || 0) * 0.0001).toFixed(4)}<br />
-                    Lng: {(-74.0060 - (telemetry[selectedVehicle.id]?.y || 0) * 0.0001).toFixed(4)}
+                    Lat: {(telemetry[selectedVehicle.id]?.lat || 40.7128).toFixed(6)}<br />
+                    Lng: {(telemetry[selectedVehicle.id]?.lng || -74.0060).toFixed(6)}
                   </div>
                 </div>
 
