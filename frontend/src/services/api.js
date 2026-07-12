@@ -78,13 +78,18 @@ export const api = {
         const data = await res.json();
         localStorage.setItem('token', data.token);
         localStorage.setItem('username', data.username);
+        localStorage.setItem('role', data.role || 'OPERATOR');
         return data;
       } catch (err) {
-        // Fallback for demo logins
+        // Fallback for demo logins - assign role based on username
         if (username && password) {
-          const fakeData = { token: 'demo-jwt-token-12345', username, role: 'ADMIN' };
+          let role = 'OPERATOR';
+          if (username.toLowerCase() === 'admin') role = 'ADMIN';
+          else if (username.toLowerCase() === 'dispatcher') role = 'DISPATCHER';
+          const fakeData = { token: 'demo-jwt-token-12345', username, role };
           localStorage.setItem('token', fakeData.token);
           localStorage.setItem('username', fakeData.username);
+          localStorage.setItem('role', role);
           return fakeData;
         }
         throw err;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Key, User as UserIcon, AlertCircle, Mail, Phone, Briefcase } from 'lucide-react';
 import { api } from '../services/api';
 
-export default function LoginPage({ setLoggedIn }) {
+export default function LoginPage({ setLoggedIn, setUserRole, setUsername }) {
   const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +21,10 @@ export default function LoginPage({ setLoggedIn }) {
     setLoading(true);
 
     try {
-      await api.auth.login(username, password);
+      const response = await api.auth.login(username, password);
+      localStorage.setItem('role', response.role || 'OPERATOR');
+      if (setUserRole) setUserRole(response.role || 'OPERATOR');
+      if (setUsername) setUsername(username);
       setLoggedIn(true);
     } catch (err) {
       setError(err.message || 'Login failed. Please verify credentials.');
