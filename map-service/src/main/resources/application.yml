@@ -3,7 +3,7 @@ spring:
     name: map-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/transportdb
+    url: jdbc:postgresql://localhost:5432/transitops
     username: postgres
     password: root@123
     driver-class-name: org.postgresql.Driver
@@ -25,3 +25,7 @@ eureka:
 
   instance:
     prefer-ip-address: true
+
+logging:
+  level:
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE

@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
+        <version>3.5.3</version>
         <relativePath/>
     </parent>
 
@@ -21,7 +21,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <spring-cloud.version>2025.1.2</spring-cloud.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
     </properties>
 
     <dependencies>
@@ -55,7 +55,7 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
-
+        
         <!-- PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
