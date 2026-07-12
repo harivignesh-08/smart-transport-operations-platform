@@ -4,6 +4,9 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class GatewayConfig {
@@ -28,7 +31,12 @@ public class GatewayConfig {
                         .uri("lb://tracking-service"))
                 .route("tracking-websocket", r -> r
                         .path("/ws/tracking/**")
+                        .and()
+                        .header("Upgrade", "(?i)websocket")
                         .uri("lb:ws://tracking-service"))
+                .route("tracking-websocket-http", r -> r
+                        .path("/ws/tracking/**")
+                        .uri("lb://tracking-service"))
                 .route("notification-service", r -> r
                         .path("/api/notifications/**")
                         .uri("lb://notification-service"))
@@ -48,5 +56,17 @@ public class GatewayConfig {
                         .path("/predict/**", "/health")
                         .uri("http://localhost:8084"))
                 .build();
+    }
+
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOriginPattern("*");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsWebFilter(source);
     }
 }
