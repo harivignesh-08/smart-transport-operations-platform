@@ -3,7 +3,17 @@ server:
 
 spring:
   application:
-    name: DIGITAL-TWIN-SERVICE
+    name: emergency-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/transitops
+    username: postgres
+    password: root@123
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
 eureka:
   client:
