@@ -93,21 +93,96 @@ export const api = {
     logout: () => {
       localStorage.removeItem('token');
       localStorage.removeItem('username');
-    }
+    },
+    register: (data) => handleRequest('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    getUsers: () => handleRequest('/api/users')
   },
   vehicles: {
     getAll: () => handleRequest('/api/vehicles'),
-    getById: (id) => handleRequest(`/api/vehicles/${id}`)
+    getById: (id) => handleRequest(`/api/vehicles/${id}`),
+    create: (data) => handleRequest('/api/vehicles', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    update: (id, data) => handleRequest(`/api/vehicles/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+    delete: (id) => handleRequest(`/api/vehicles/${id}`, { method: 'DELETE' }),
+    updateStatus: (id, status) => handleRequest(`/api/vehicles/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    }),
+    updateAvailability: (id, availability) => handleRequest(`/api/vehicles/${id}/availability`, {
+      method: 'PUT',
+      body: JSON.stringify({ availability })
+    })
   },
   drivers: {
-    getAll: () => handleRequest('/api/drivers')
+    getAll: () => handleRequest('/api/drivers'),
+    create: (data) => handleRequest('/api/drivers', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    update: (id, data) => handleRequest(`/api/drivers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+    delete: (id) => handleRequest(`/api/drivers/${id}`, { method: 'DELETE' })
+  },
+  trips: {
+    getAll: () => handleRequest('/api/trips'),
+    create: (data) => handleRequest('/api/trips', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    update: (id, data) => handleRequest(`/api/trips/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+    delete: (id) => handleRequest(`/api/trips/${id}`, { method: 'DELETE' })
+  },
+  tracking: {
+    getLiveTracking: () => handleRequest('/api/tracking/live'),
+    reportLocation: (data) => handleRequest('/api/tracking/location', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    connectWebSocket: (url = `ws://localhost:8080/ws/tracking`) => {
+      return new WebSocket(url);
+    }
+  },
+  notifications: {
+    getAll: () => handleRequest('/api/notifications')
+  },
+  map: {
+    getLiveMap: () => handleRequest('/api/map/live')
+  },
+  files: {
+    upload: (formData) => {
+      const token = localStorage.getItem('token') || '';
+      return fetch(`${API_BASE_URL}/files/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      }).then(res => res.json());
+    },
+    getAll: () => handleRequest('/files')
   },
   emergencies: {
     getAll: () => handleRequest('/emergencies'),
-    report: (data) => handleRequest('/emergencies', {
+    create: (data) => handleRequest('/emergencies', {
       method: 'POST',
       body: JSON.stringify(data)
     })
+  },
+  digitalTwins: {
+    getAll: () => handleRequest('/digitaltwins')
   },
   ai: {
     predictEta: (params) => handleRequest(`/predict/eta?distance=${params.distance}&traffic=${params.traffic}`),
@@ -116,5 +191,8 @@ export const api = {
     predictFuel: (params) => handleRequest(`/predict/fuel?tripId=${params.tripId}`),
     predictDriver: (driverId) => handleRequest(`/predict/driver?driverId=${driverId}`),
     predictHealth: (vehicleId) => handleRequest(`/predict/health?vehicleId=${vehicleId}`)
+  },
+  health: {
+    check: () => handleRequest('/health')
   }
 };

@@ -16,7 +16,7 @@ export default function TopBar({ currentTab }) {
     <header className="topbar">
       <div>
         <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>
-          {tabTitles[currentTab] || 'TransitOps Portal'}
+          {tabTitles[currentTab] || 'Openeye Operations Portal'}
         </h2>
       </div>
 

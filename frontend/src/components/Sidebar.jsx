@@ -34,7 +34,7 @@ export default function Sidebar({ currentTab, setCurrentTab, setLoggedIn }) {
           boxShadow: 'var(--glow-cyan)' 
         }} />
         <span style={{ fontWeight: '800', fontSize: '18px', color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
-          TransitOps <span style={{ color: 'var(--accent-cyan)' }}>AI</span>
+          Openeye <span style={{ color: 'var(--accent-cyan)' }}>AI</span>
         </span>
       </div>
 

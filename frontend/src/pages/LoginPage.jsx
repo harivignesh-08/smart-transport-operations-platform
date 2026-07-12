@@ -41,9 +41,9 @@ export default function LoginPage({ setLoggedIn }) {
           }}>
             <Shield size={32} />
           </div>
-          <h1 style={{ fontSize: '28px' }}>TransitOps Control</h1>
+          <h1 style={{ fontSize: '28px' }}>Openeye Control</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '6px' }}>
-            Enter dispatch credentials to log in.
+            Enter dispatch credentials to access fleet operations.
           </p>
         </div>
 
