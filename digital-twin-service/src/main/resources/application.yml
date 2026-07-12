@@ -1,4 +1,5 @@
 server:
+<<<<<<< HEAD
   port: 8083
 
 spring:
@@ -10,16 +11,38 @@ spring:
     username: postgres
     password: root@123
 
+=======
+  port: 8088
+
+spring:
+  application:
+    name: digital-twin-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/digital_twin_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: hari@2509
+    driver-class-name: com.mysql.cj.jdbc.Driver
+>>>>>>> fb5e013 (Updated service APIs)
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
     properties:
       hibernate:
+<<<<<<< HEAD
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+=======
+        dialect: org.hibernate.dialect.MySQLDialect
+>>>>>>> fb5e013 (Updated service APIs)
 
 eureka:
   client:
     service-url:
+<<<<<<< HEAD
       defaultZone: http://localhost:8761/eureka
+=======
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+>>>>>>> fb5e013 (Updated service APIs)

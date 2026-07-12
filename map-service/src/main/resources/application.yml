@@ -14,7 +14,11 @@ spring:
     show-sql: true
 
 server:
+<<<<<<< HEAD
   port: 8082
+=======
+  port: 8087
+>>>>>>> fb5e013 (Updated service APIs)
 
 eureka:
   client:

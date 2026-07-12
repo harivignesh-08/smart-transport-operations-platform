@@ -1,0 +1,104 @@
+# ==========================
+# Java
+# ==========================
+*.class
+*.log
+*.ctxt
+
+# ==========================
+# Maven
+# ==========================
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# ==========================
+# Gradle
+# ==========================
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# ==========================
+# IntelliJ IDEA
+# ==========================
+.idea/
+*.iml
+out/
+
+# ==========================
+# VS Code
+# ==========================
+.vscode/
+
+# ==========================
+# Eclipse
+# ==========================
+.project
+.classpath
+.settings/
+bin/
+
+# ==========================
+# NetBeans
+# ==========================
+nbproject/private/
+nbbuild/
+dist/
+
+# ==========================
+# OS Files
+# ==========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================
+# Logs
+# ==========================
+logs/
+*.log
+
+# ==========================
+# Spring Boot
+# ==========================
+*.pid
+*.seed
+*.pid.lock
+
+# ==========================
+# Environment Files
+# ==========================
+.env
+.env.*
+
+# ==========================
+# Application Secrets
+# ==========================
+application-local.properties
+application-secret.properties
+
+# ==========================
+# Temporary Files
+# ==========================
+*.tmp
+*.swp
+*.bak
+
+# ==========================
+# Node (if React frontend)
+# ==========================
+node_modules/
+dist/
+coverage/
+
+# ==========================
+# Python (AI Service)
+# ==========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.pytest_cache/
