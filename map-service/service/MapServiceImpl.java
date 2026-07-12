@@ -21,7 +21,11 @@ public class MapServiceImpl implements MapService {
 
         return repository.save(location);
     }
-
+    @Override
+    public VehicleLocation getVehicleLocation(Long vehicleId) {
+    return repository.findByVehicleId(vehicleId)
+            .orElse(null);
+}
     @Override
     public List<VehicleLocation> getAllLocations() {
         return repository.findAll();

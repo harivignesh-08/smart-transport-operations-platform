@@ -23,4 +23,10 @@ public class MapController {
     public List<VehicleLocation> getAllLocations() {
         return mapService.getAllLocations();
     }
+    @GetMapping("/vehicle/{vehicleId}")
+public VehicleLocation getVehicleLocation(
+        @PathVariable Long vehicleId) {
+
+    return mapService.getVehicleLocation(vehicleId);
+}
 }
